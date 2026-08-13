@@ -7,43 +7,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
         with:
-          python-version: '3.11'
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install system dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev cmake libffi-dev libssl-dev build-essential
-
-      - name: Install buildozer
-        run: |
-          pip install --upgrade buildozer cython
-
-      - name: Accept Android SDK licenses
-        run: |
-          mkdir -p ~/.buildozer
-          yes | pip install --upgrade buildozer
-
-      - name: Build APK
-        env:
-          ANDROID_SDK_ROOT: /home/runner/.buildozer/android/platform/android-sdk
-        run: |
-          yes | buildozer android debug || yes | buildozer android debug
+          command: buildozer android debug
+          buildozer_version: stable
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: chatapp-apk
-          path: bin/*.apk
+          path: ${{ steps.buildozer.outputs.filename }}

@@ -15,7 +15,7 @@ jobs:
 
       - name: Build APK
         run: |
-          buildozer android debug 2>&1 | tee build_log.txt
+          yes | buildozer android debug 2>&1 | tee build_log.txt
 
       - name: Upload build log
         if: always()

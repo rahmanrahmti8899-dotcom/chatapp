@@ -25,16 +25,24 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev cmake libffi-dev libssl-dev build-essential
+          sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev build-essential
 
-      - name: Install buildozer with Python 3.11
+      - name: Force default python to 3.11
         run: |
-          python3.11 -m pip install --upgrade pip
-          python3.11 -m pip install buildozer cython==0.29.36
+          sudo update-alternatives --install /usr/bin/python python /opt/hostedtoolcache/Python/3.11.15/x64/bin/python3.11 1
+          sudo update-alternatives --set python /opt/hostedtoolcache/Python/3.11.15/x64/bin/python3.11
+          sudo ln -sf /opt/hostedtoolcache/Python/3.11.15/x64/bin/python3.11 /usr/bin/python3
+          python --version
+          python3 --version
+
+      - name: Install buildozer with pip
+        run: |
+          python3.11 -m pip install --upgrade pip setuptools wheel Cython==0.29.33
+          python3.11 -m pip install buildozer
 
       - name: Build APK
         run: |
-          yes | python3.11 -m buildozer android debug 2>&1 | tee build_log.txt
+          yes | python3.11 -m buildozer -v android debug 2>&1 | tee build_log.txt
 
       - name: Upload build log
         if: always()
